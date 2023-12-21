@@ -22,37 +22,47 @@ def check_lottery_numbers(numbers, driver, url):
         number_input.send_keys(number)
         submit_button.click()
 
-        # Wait for response and extract it
-        time.sleep(2)  # Adjust this sleep time as necessary
-        response_element = driver.find_element(By.CSS_SELECTOR, "#result_navidad p")
+        # Wait for response to be visible and extract it
+        wait = WebDriverWait(driver, 10)
+        response_element = wait.until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "#result_navidad p"))
+        )
         response = response_element.text
-        results.append(f"Number: {number}, Result: {response}")
+
+        # Append the result for this number
+        results.append(f"Number: {number}, Message: {response}")
 
     return results
 
 
-
 def main():
     # URL of the page containing the lottery checker
-    url = 'https://www.rtve.es/components/loteria/navidad/embeber.html'
+    url = "https://www.rtve.es/loterias/loteria-navidad/buscador/"
 
-    # Read numbers from file
-    with open('numeros-loteria.txt', 'r') as file:
-        numbers = [line.strip() for line in file.readlines()]
+    # Read numbers from file and extract only the first 5-digit numbers from each line
+    with open("numeros-loteria.txt", "r") as file:
+        numbers = [
+            line[:5]
+            for line in file.readlines()
+            if line[:5].isdigit() and len(line[:5]) == 5
+        ]
 
     # Set up the Selenium driver
-    service = Service(executable_path='/home/tostimontes/Webdrivers/chromedriver-linux64/chromedriver')  # Update the path to your chromedriver
+    service = Service(
+        executable_path="/home/tostimontes/Webdrivers/chromedriver-linux64/chromedriver"
+    )  # Update the path to your chromedriver
     driver = webdriver.Chrome(service=service)
 
     # Check numbers and get results
     results = check_lottery_numbers(numbers, driver, url)
 
     # Write results to a file
-    with open('lottery_results.txt', 'w') as file:
+    with open("lottery_results.txt", "w") as file:
         for result in results:
-            file.write(result + '\n')
+            file.write(result + "\n")
 
     driver.quit()
+
 
 if __name__ == "__main__":
     main()
