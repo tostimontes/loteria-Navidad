@@ -22,15 +22,28 @@ def check_lottery_numbers(numbers, driver, url):
         number_input.send_keys(number)
         submit_button.click()
 
-        # Wait for response to be visible and extract it
+        # Wait for response to be visible
         wait = WebDriverWait(driver, 10)
-        response_element = wait.until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, "#result_navidad p"))
-        )
-        response = response_element.text
+        wait.until(EC.visibility_of_element_located((By.ID, "result_navidad")))
 
-        # Append the result for this number
-        results.append(f"Number: {number}, Message: {response}")
+        # Check if it's a winning message
+        content_div = driver.find_element(By.ID, "total_navidad")
+        if "¡Enhorabuena!" in content_div.text:
+            # Extract details for winning scenario
+            prize_message = content_div.find_element(By.CSS_SELECTOR, "p.num").text
+            prize_amount_text = content_div.find_element(By.CSS_SELECTOR, "p.prem").text
+
+            # Check the prize amount
+            if "100" in prize_amount_text:
+                detailed_prize_info = "Una mijita, menoh da una piedra hijo."
+            else:
+                detailed_prize_info = prize_message + " " + prize_amount_text
+
+            results.append(f"Número: {number}, Premio: {detailed_prize_info}")
+        else:
+            # Handle no prize scenario
+            no_prize_message = "Náh y menoh."
+            results.append(f"Número: {number}, Premio: {no_prize_message}")
 
     return results
 
