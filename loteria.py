@@ -1,3 +1,4 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -35,14 +36,14 @@ def check_lottery_numbers(numbers, driver, url):
 
             # Check the prize amount
             if "100" in prize_amount_text:
-                detailed_prize_info = "Una mijita, menoh da una piedra hijo."
+                detailed_prize_info = "Una mijita."
             else:
                 detailed_prize_info = prize_message + " " + prize_amount_text
 
             results.append(f"Número: {number}, Premio: {detailed_prize_info}")
         else:
             # Handle no prize scenario
-            no_prize_message = "Náh y menoh."
+            no_prize_message = "Nada y menos."
             results.append(f"Número: {number}, Premio: {no_prize_message}")
 
     return results
@@ -61,9 +62,10 @@ def main():
         ]
 
     # Set up the Selenium driver
-    service = Service(
-        executable_path="/home/tostimontes/Webdrivers/chromedriver-linux64/chromedriver"
-    )  # Update the path to your chromedriver
+    service = Service(executable_path=os.environ.get("LINUX_CHROMEDRIVER_EXE_PATH"))
+    if not executable_path:
+        raise ValueError("CHROMEDRIVER_EXE_PATH environment variable is not set")
+    # Update the path to your chromedriver
     driver = webdriver.Chrome(service=service)
 
     # Check numbers and get results
